@@ -1,0 +1,329 @@
+.env-manager {
+  padding: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.env-manager h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #eaeaea;
+}
+
+.card-title {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title svg {
+  width: 20px;
+  height: 20px;
+  color: #2196F3;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.env-vars-container {
+  margin-top: 20px;
+}
+
+.env-vars-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.env-vars-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #444;
+}
+
+.add-var-btn {
+  padding: 6px 12px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.2s;
+}
+
+.add-var-btn:hover {
+  background: #43A047;
+}
+
+.add-var-btn:active {
+  transform: translateY(1px);
+}
+
+.add-var-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.env-var-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.env-var-row .form-input {
+  flex: 1;
+}
+
+.remove-var-btn {
+  padding: 8px 10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.remove-var-btn:hover {
+  background: #e53935;
+}
+
+.remove-var-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.remove-var-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.save-btn {
+  margin-top: 8px;
+  padding: 10px 20px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  width: 100%;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.save-btn:hover {
+  background: #1E88E5;
+}
+
+.save-btn:active {
+  transform: translateY(1px);
+}
+
+.section-title {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.env-sets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.env-set-item {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  background: white;
+  transition: all 0.2s;
+  position: relative;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.env-set-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.env-set-item.active {
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+}
+
+.env-set-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.env-set-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.env-set-badge {
+  padding: 3px 8px;
+  background: #2196F3;
+  color: white;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.env-set-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  flex: 1;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.activate-btn {
+  background: #2196F3;
+  color: white;
+}
+
+.activate-btn:hover {
+  background: #1E88E5;
+}
+
+.delete-btn {
+  background: #ff4444;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #e53935;
+}
+
+.env-set-vars {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-bottom: 12px;
+}
+
+.env-var-item {
+  display: flex;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.env-var-key {
+  font-weight: 600;
+  color: #555;
+  min-width: 120px;
+  word-break: break-all;
+}
+
+.env-var-value {
+  flex: 1;
+  color: #777;
+  word-break: break-all;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px 15px;
+  color: #777;
+}
+
+.empty-state-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  color: #ccc;
+}
+
+.empty-state-text {
+  margin: 0;
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .env-manager {
+    padding: 12px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+  
+  .env-var-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .remove-var-btn {
+    align-self: flex-end;
+  }
+}
