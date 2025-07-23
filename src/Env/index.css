@@ -174,9 +174,46 @@
   transform: translateY(1px);
 }
 
-.section-title {
-  margin-top: 0;
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 250px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  z-index: 1;
+  color: #999;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 13px;
+  background: #f8f9fa;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #2196F3;
+  background: white;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.section-title {
+  margin: 0;
   color: #333;
   font-size: 18px;
   font-weight: 600;
@@ -215,6 +252,12 @@
   margin-bottom: 12px;
 }
 
+.env-set-title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .env-set-name {
   margin: 0;
   font-size: 16px;
@@ -233,47 +276,105 @@
 
 .env-set-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 4px;
 }
 
-.action-btn {
-  padding: 6px 12px;
+.icon-btn {
+  padding: 8px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  flex: 1;
-  text-align: center;
-  transition: background-color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
-.action-btn:disabled {
+.icon-btn:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-.activate-btn {
+.icon-btn.activate-btn {
   background: #2196F3;
   color: white;
 }
 
-.activate-btn:hover {
+.icon-btn.activate-btn:hover:not(:disabled) {
   background: #1E88E5;
 }
 
-.delete-btn {
+.icon-btn.edit-btn {
+  background: #9C27B0;
+  color: white;
+}
+
+.icon-btn.edit-btn:hover {
+  background: #7B1FA2;
+}
+
+.icon-btn.copy-btn {
+  background: #FF9800;
+  color: white;
+}
+
+.icon-btn.copy-btn:hover {
+  background: #F57C00;
+}
+
+.icon-btn.delete-btn {
   background: #ff4444;
   color: white;
 }
 
-.delete-btn:hover {
+.icon-btn.delete-btn:hover {
   background: #e53935;
+}
+
+.edit-mode {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px solid #2196F3;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.save-edit-btn {
+  padding: 8px 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.save-edit-btn:hover {
+  background: #43A047;
+}
+
+.cancel-edit-btn {
+  padding: 8px 16px;
+  background: #757575;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.cancel-edit-btn:hover {
+  background: #616161;
 }
 
 .env-set-vars {
