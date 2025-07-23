@@ -6,28 +6,52 @@ export default function Env ({ enterAction }) {
   const [currentEnv, setCurrentEnv] = useState(null)
   const [newEnvName, setNewEnvName] = useState('')
   const [newEnvVars, setNewEnvVars] = useState([{ key: '', value: '' }])
-
+  const [activatingEnvId, setActivatingEnvId] = useState(null) // 用于跟踪正在激活的环境变量集ID
+  
   // 加载保存的环境变量集
   useEffect(() => {
-    const savedEnvSets = window.localStorage.getItem('utools_env_sets')
+    // 注册云端数据同步回调
+    window.utools.onDbPull(() => {
+      loadEnvSetsFromDbStorage()
+    })
+    
+    loadEnvSetsFromDbStorage()
+  }, [])
+  
+  // 存储服务 - 只使用加密存储
+  const storageService = {
+    getItem: (key) => {
+      return window.utools.dbCryptoStorage.getItem(key)
+    },
+    setItem: (key, value) => {
+      return window.utools.dbCryptoStorage.setItem(key, value)
+    },
+    removeItem: (key) => {
+      return window.utools.dbCryptoStorage.removeItem(key)
+    }
+  }
+  
+  // 从存储中加载环境变量集
+  const loadEnvSetsFromDbStorage = () => {
+    const savedEnvSets = storageService.getItem('utools_env_sets')
+    
     if (savedEnvSets) {
-      const parsed = JSON.parse(savedEnvSets)
-      setEnvSets(parsed)
+      setEnvSets(savedEnvSets)
       
       // 获取当前激活的环境变量集
-      const activeEnvId = window.localStorage.getItem('utools_active_env')
+      const activeEnvId = storageService.getItem('utools_active_env')
       if (activeEnvId) {
-        const activeEnv = parsed.find(env => env.id === activeEnvId)
+        const activeEnv = savedEnvSets.find(env => env.id === activeEnvId)
         if (activeEnv) {
           setCurrentEnv(activeEnv)
         }
       }
     }
-  }, [])
+  }
 
-  // 保存环境变量集到localStorage
+  // 保存环境变量集到存储
   const saveEnvSets = (sets) => {
-    window.localStorage.setItem('utools_env_sets', JSON.stringify(sets))
+    storageService.setItem('utools_env_sets', sets)
     setEnvSets(sets)
   }
 
@@ -84,19 +108,22 @@ export default function Env ({ enterAction }) {
     window.utools.showNotification('环境变量集保存成功')
   }
 
-  // 激活环境变量集（支持多个集合并激活）
+  // 激活环境变量集（使用单个设置方法）
   const activateEnvSet = async (envSet) => {
+    // 防止重复点击
+    if (activatingEnvId === envSet.id) return
+    
+    setActivatingEnvId(envSet.id)
     try {
-      // 在Windows上设置环境变量
+      // 在Windows上设置环境变量（逐个设置）
       if (window.services && window.services.setWindowsEnvVar) {
-        // 设置新的环境变量（不清理之前的变量，实现合并效果）
         for (const envVar of envSet.vars) {
           await window.services.setWindowsEnvVar(envVar.key, envVar.value)
         }
       }
       
-      // 保存当前激活的环境变量集ID
-      window.localStorage.setItem('utools_active_env', envSet.id)
+      // 保存当前激活的环境变量集ID到存储
+      storageService.setItem('utools_active_env', envSet.id)
       setCurrentEnv(envSet)
       
       // 通知用户
@@ -104,6 +131,8 @@ export default function Env ({ enterAction }) {
     } catch (error) {
       console.error('激活环境变量集失败:', error)
       window.utools.showNotification('激活环境变量集失败: ' + error.message)
+    } finally {
+      setActivatingEnvId(null)
     }
   }
 
@@ -115,16 +144,17 @@ export default function Env ({ enterAction }) {
     // 如果删除的是当前激活的环境变量集，则清除当前激活状态
     if (currentEnv && currentEnv.id === envSetId) {
       setCurrentEnv(null)
-      window.localStorage.removeItem('utools_active_env')
+      storageService.removeItem('utools_active_env')
     }
     
     window.utools.showNotification('环境变量集已删除')
   }
 
+    
   return (
     <div className="env-manager">
       <h2>环境变量管理器</h2>
-      
+            
       {/* 新建环境变量集 */}
       <div className="card">
         <h3 className="card-title">
@@ -215,8 +245,16 @@ export default function Env ({ enterAction }) {
                   <button 
                     onClick={() => activateEnvSet(envSet)} 
                     className="action-btn activate-btn"
+                    disabled={activatingEnvId === envSet.id}
                   >
-                    激活
+                    {activatingEnvId === envSet.id ? (
+                      <>
+                        <span className="loading-spinner"></span>
+                        激活中...
+                      </>
+                    ) : (
+                      '激活'
+                    )}
                   </button>
                   <button onClick={() => deleteEnvSet(envSet.id)} className="action-btn delete-btn">
                     删除
