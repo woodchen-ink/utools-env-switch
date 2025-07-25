@@ -11,6 +11,8 @@ export default function Env ({ enterAction }) {
   const [editingEnvId, setEditingEnvId] = useState(null) // 正在编辑的环境变量集ID
   const [editEnvName, setEditEnvName] = useState('') // 编辑中的环境变量集名称
   const [editEnvVars, setEditEnvVars] = useState([]) // 编辑中的环境变量
+  const [clearingEnvId, setClearingEnvId] = useState(null) // 用于跟踪正在清除的环境变量集ID
+  const [confirmDialog, setConfirmDialog] = useState(null) // 确认对话框状态
   
   // 加载保存的环境变量集
   useEffect(() => {
@@ -241,21 +243,71 @@ export default function Env ({ enterAction }) {
     const envSet = envSets.find(env => env.id === envSetId)
     if (!envSet) return
     
-    // 确认删除
-    if (!confirm(`确定要删除环境变量集 "${envSet.name}" 吗？此操作不可撤销。`)) {
-      return
-    }
+    // 显示确认对话框
+    setConfirmDialog({
+      title: '确认删除',
+      message: `确定要删除环境变量集 "${envSet.name}" 吗？此操作不可撤销。`,
+      onConfirm: () => {
+        const updatedEnvSets = envSets.filter(envSet => envSet.id !== envSetId)
+        saveEnvSets(updatedEnvSets)
+        
+        // 如果删除的是当前激活的环境变量集，则清除当前激活状态
+        if (currentEnv && currentEnv.id === envSetId) {
+          setCurrentEnv(null)
+          storageService.removeItem('utools_active_env')
+        }
+        
+        window.utools.showNotification('环境变量集已删除')
+        setConfirmDialog(null)
+      },
+      onCancel: () => {
+        setConfirmDialog(null)
+      }
+    })
+  }
+
+  // 清除环境变量集（从系统环境变量中移除所有键）
+  const clearEnvSet = async (envSet) => {
+    // 防止重复点击
+    if (clearingEnvId === envSet.id) return
     
-    const updatedEnvSets = envSets.filter(envSet => envSet.id !== envSetId)
-    saveEnvSets(updatedEnvSets)
-    
-    // 如果删除的是当前激活的环境变量集，则清除当前激活状态
-    if (currentEnv && currentEnv.id === envSetId) {
-      setCurrentEnv(null)
-      storageService.removeItem('utools_active_env')
-    }
-    
-    window.utools.showNotification('环境变量集已删除')
+    // 显示确认对话框
+    setConfirmDialog({
+      title: '确认清除环境变量',
+      message: `确定要清除环境变量集 "${envSet.name}" 中的所有环境变量吗？`,
+      details: `这将从系统环境变量中完全删除以下键名：\n${envSet.vars.map(v => `• ${v.key}`).join('\n')}\n\n注意：这是从环境变量中完全删除这些键，不只是清空值。此操作不可撤销。`,
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        setClearingEnvId(envSet.id)
+        try {
+          // 使用后端服务清除环境变量
+          if (window.services && window.services.clearEnvSet) {
+            const result = await window.services.clearEnvSet(envSet)
+            
+            // 统计成功和失败的数量
+            const successCount = result.results.filter(r => r.success).length
+            const failCount = result.results.filter(r => !r.success).length
+            
+            if (failCount === 0) {
+              window.utools.showNotification(`已成功清除环境变量集 "${envSet.name}" 中的 ${successCount} 个环境变量`)
+            } else {
+              window.utools.showNotification(`清除完成：成功 ${successCount} 个，失败 ${failCount} 个。请查看控制台了解详情。`)
+              console.warn('部分环境变量清除失败:', result.results.filter(r => !r.success))
+            }
+          } else {
+            throw new Error('清除功能不可用，请检查后端服务')
+          }
+        } catch (error) {
+          console.error('清除环境变量集失败:', error)
+          window.utools.showNotification('清除环境变量集失败: ' + error.message)
+        } finally {
+          setClearingEnvId(null)
+        }
+      },
+      onCancel: () => {
+        setConfirmDialog(null)
+      }
+    })
   }
 
     
@@ -453,6 +505,21 @@ export default function Env ({ enterAction }) {
                             <path d="M16 17V19C16 19.5523 15.5523 20 15 20H5C4.44772 20 4 19.5523 4 19V8C4 7.44772 4.44772 7 5 7H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         </button>
+                        <button 
+                          onClick={() => clearEnvSet(envSet)} 
+                          className="icon-btn clear-btn" 
+                          disabled={clearingEnvId === envSet.id}
+                          title="清除环境变量集（从系统环境变量中完全删除这些键名）"
+                        >
+                          {clearingEnvId === envSet.id ? (
+                            <span className="loading-spinner"></span>
+                          ) : (
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                              <path d="M8 6V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V6M19 6V20C19 20.5523 18.4477 21 18 21H6C5.44772 21 5 20.5523 5 20V6H19ZM4 6H20M10 11V17M14 11V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M12 8V12M12 12V16M12 12H8M12 12H16" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </button>
                         <button onClick={() => deleteEnvSet(envSet.id)} className="icon-btn delete-btn" title="删除环境变量集">
                           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
                             <path d="M3 6H5H21M8 6V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V6M19 6V20C19 20.5523 18.4477 21 18 21H6C5.44772 21 5 20.5523 5 20V6H19ZM10 11V17M14 11V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -475,6 +542,33 @@ export default function Env ({ enterAction }) {
           </div>
         )}
       </div>
+      
+      {/* 确认对话框 */}
+      {confirmDialog && (
+        <div className="confirm-overlay">
+          <div className="confirm-dialog">
+            <div className="confirm-header">
+              <h3 className="confirm-title">{confirmDialog.title}</h3>
+            </div>
+            <div className="confirm-content">
+              <p className="confirm-message">{confirmDialog.message}</p>
+              {confirmDialog.details && (
+                <div className="confirm-details">
+                  <pre>{confirmDialog.details}</pre>
+                </div>
+              )}
+            </div>
+            <div className="confirm-actions">
+              <button onClick={confirmDialog.onCancel} className="confirm-cancel-btn">
+                取消
+              </button>
+              <button onClick={confirmDialog.onConfirm} className="confirm-ok-btn">
+                确定
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
