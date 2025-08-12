@@ -161,7 +161,7 @@ export default function Env ({ enterAction }) {
     const newEnvSet = {
       id: Date.now().toString(),
       name: `${envSet.name} - 副本`,
-      vars: [...envSet.vars]
+      vars: envSet.vars.map(envVar => ({ ...envVar }))
     }
     
     const updatedEnvSets = [...envSets, newEnvSet]
